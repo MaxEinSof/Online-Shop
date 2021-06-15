@@ -1,5 +1,5 @@
 import store from '@/store'
-import axios from '@/axios/product'
+import databaseAxios from '@/axios/database'
 
 export default {
   namespaced: true,
@@ -37,7 +37,7 @@ export default {
   actions: {
     async loadCategories({ commit }) {
       try {
-        const { data } = await axios.get('/categories.json')
+        const { data } = await databaseAxios.get('/categories.json')
 
         if (data) {
           const categories = Object.keys(data).map(id => ({ ...data[id], id }))
@@ -52,8 +52,7 @@ export default {
     },
     async createCategory({ commit }, category) {
       try {
-        const token = store.getters['auth/token']
-        const { data } = await axios.post(`/categories.json?auth=${token}`, category)
+        const { data } = await databaseAxios.post('/categories.json', category)
 
         commit('addCategory', {
           id: data.name,
@@ -73,8 +72,7 @@ export default {
     },
     async removeCategory({ commit }, id) {
       try {
-        const token = store.getters['auth/token']
-        await axios.delete(`/categories/${id}.json?auth=${token}`)
+        await databaseAxios.delete(`/categories/${id}.json`)
         commit('removeCategory', id)
 
         store.dispatch('message/setMessage', {

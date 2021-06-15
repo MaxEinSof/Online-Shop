@@ -26,16 +26,9 @@ export default {
     const products = computed(() => {
       return store.getters['products/products']
         ?.filter(product => {
-          if (filter.value.name) {
-            return product.title.toLowerCase().includes(filter.value.name.toLowerCase())
-          }
-          return product
-        })
-        .filter(product => {
-          if (filter.value.type) {
-            return product.category === filter.value.type
-          }
-          return product
+          const condition1 = filter.value.name ? product.title.toLowerCase().includes(filter.value.name.toLowerCase()) : true
+          const condition2 = filter.value.type ? product.category === filter.value.type : true
+          return condition1 && condition2
         })
     })
 

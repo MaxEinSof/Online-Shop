@@ -36,6 +36,10 @@ export default {
         delete state.cart[product.id]
       }
       localStorage.setItem('cart', JSON.stringify(state.cart))
+    },
+    clearCart(state) {
+      state.cart = {}
+      localStorage.removeItem('cart')
     }
   }
 }

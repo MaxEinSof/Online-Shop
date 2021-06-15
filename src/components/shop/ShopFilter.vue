@@ -71,9 +71,9 @@ export default {
 
     const categories = computed(() => store.getters['categories/categories'])
 
-    watch([name, type], values => {
-      setQueryParams(values[0], values[1])
-      updateFilterValues(values[0], values[1])
+    watch([name, type], ([name, type]) => {
+      setQueryParams(name, type)
+      updateFilterValues(name, type)
     })
 
     function setFilterValues() {

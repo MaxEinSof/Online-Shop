@@ -1,69 +1,54 @@
 <template>
   <app-page title="Войти в систему">
-    <form @submit.prevent="onSubmit">
-      <app-input
-        type="email"
-        id="email"
-        label="Почта"
-        v-model="email"
-        :error="emailValidationError || invalidEmailError"
-        :blur="emailBlur"
-      />
-
-      <app-input
-        type="password"
-        id="password"
-        label="Пароль"
-        v-model="password"
-        :error="passwordValidationError || invalidPasswordError"
-        :blur="passwordBlur"
-      />
-
-      <button
-        type="submit"
-        class="btn primary"
-        :disabled="!email || !password || isSubmitting || isTooManyAttempts"
-      >Войти
-      </button>
-
-      <span
-        class="text-danger"
-        v-if="isTooManyAttempts"
-      >Вы слишком часто пытаетесь войти в систему. Попробуйте позже.</span>
-    </form>
+    <auth-form :submitCallback="submitCallback"/>
   </app-page>
 </template>
 
 <script>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useStore } from 'vuex'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import AppPage from '@/components/ui/AppPage'
-import AppInput from '@/components/ui/AppInput'
-import useLoginValidation from '@/use/login-validation'
+import AuthForm from '@/components/auth/AuthForm'
 import getErrorMessage from '@/utils/get-error-message'
 
 export default {
   setup() {
     const store = useStore()
     const route = useRoute()
+    const router = useRouter()
 
     if (route.query.message) {
+      setMessage(route.query.message)
+    }
+
+    const routeQueryMessage = computed(() => route.query.message)
+
+    watch(routeQueryMessage, message => {
+      if (message) {
+        setMessage(message)
+      }
+    })
+
+    function setMessage(message) {
       store.dispatch('message/setMessage', {
         type: 'warning',
-        value: getErrorMessage(route.query.message)
+        value: getErrorMessage(message)
       })
     }
 
-    const invalidEmailError = computed(() => store.getters['auth/emailError'])
-    const invalidPasswordError = computed(() => store.getters['auth/passwordError'])
+    async function submitCallback(values) {
+      try {
+        await store.dispatch('auth/signIn', values)
+        router.push({ name: 'Admin' })
+      } catch (e) {
+      }
+    }
 
     return {
-      ...useLoginValidation(),
-      invalidEmailError,
-      invalidPasswordError
+      submitCallback
     }
   },
-  components: { AppPage, AppInput }
+  components: { AppPage, AuthForm }
 }
 </script>

@@ -1,5 +1,5 @@
 import store from '@/store'
-import axios from '@/axios/product'
+import databaseAxios from '@/axios/database'
 
 export default {
   namespaced: true,
@@ -41,12 +41,15 @@ export default {
       if (index >= 0) {
         state.products[index] = product
       }
+    },
+    updateInStock(state, { id, inStock }) {
+      state.products.find(product => product.id === id).inStock = inStock
     }
   },
   actions: {
     async loadProducts({ commit }) {
       try {
-        const { data } = await axios.get('/products.json')
+        const { data } = await databaseAxios.get('/products.json')
 
         if (data) {
           const products = Object.keys(data).map(id => ({ ...data[id], id }))
@@ -61,7 +64,7 @@ export default {
     },
     async loadProductById(_, id) {
       try {
-        const { data } = await axios.get(`/products/${id}.json`)
+        const { data } = await databaseAxios.get(`/products/${id}.json`)
         return { ...data, id }
       } catch (e) {
         store.dispatch('message/setMessage', {
@@ -72,8 +75,7 @@ export default {
     },
     async createProduct({ commit, getters }, product) {
       try {
-        const token = store.getters['auth/token']
-        const { data } = await axios.post(`/products.json?auth=${token}`, product)
+        const { data } = await databaseAxios.post('/products.json', product)
 
         commit('addProduct', {
           data: {
@@ -96,8 +98,7 @@ export default {
     },
     async removeProduct({ commit }, id) {
       try {
-        const token = store.getters['auth/token']
-        await axios.delete(`/products/${id}.json?auth=${token}`)
+        await databaseAxios.delete(`/products/${id}.json`)
         commit('removeProduct', id)
 
         store.dispatch('message/setMessage', {
@@ -113,8 +114,7 @@ export default {
     },
     async updateProduct({ commit }, product) {
       try {
-        const token = store.getters['auth/token']
-        await axios.put(`/products/${product.id}.json?auth=${token}`, product)
+        await databaseAxios.put(`/products/${product.id}.json`, product)
         commit('updateProduct', product)
 
         store.dispatch('message/setMessage', {

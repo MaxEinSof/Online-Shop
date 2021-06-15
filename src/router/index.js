@@ -28,6 +28,14 @@ const router = createRouter({
       }
     },
     {
+      path: '/thanks',
+      name: 'Thanks',
+      component: () => import('@/views/Thanks.vue'),
+      meta: {
+        layout: 'main'
+      }
+    },
+    {
       path: '/admin',
       name: 'Admin',
       redirect: {
@@ -36,7 +44,8 @@ const router = createRouter({
       component: () => import('@/views/admin/Admin.vue'),
       meta: {
         layout: 'admin',
-        isAuthRequired: true
+        isAuthRequired: true,
+        isAdminAccessRequired: true
       },
       children: [
         {
@@ -71,11 +80,25 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  if (to.meta.isAuthRequired && !store.getters['auth/isAuthenticated']) {
-    next('/auth?message=auth')
-  } else {
-    next()
+  if (to.meta.isAdminAccessRequired) {
+    if (store.getters['auth/isAdmin']) {
+      return next()
+    } else if (store.getters['auth/isUser']) {
+      return next('/auth?message=admin')
+    } else {
+      return next('/auth')
+    }
   }
+
+  if (to.meta.isAuthRequired) {
+    if (store.getters['auth/isAuthenticated']) {
+      return next()
+    } else {
+      return next('/auth?message=auth')
+    }
+  }
+
+  next()
 })
 
 export default router
