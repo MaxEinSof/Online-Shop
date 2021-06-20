@@ -5,7 +5,7 @@
   />
 
   <app-page
-    v-else-if="productModel"
+    v-else-if="initial.title"
     :title="initial.title"
     back="/admin/products"
   >
@@ -123,13 +123,9 @@ export default {
 
     onMounted(async () => {
       initial.value = await store.dispatch('products/loadProductById', route.params.id)
-
       productValueNames = Object.keys(initial.value)
-
       setModelsToInitialValues()
-
       await store.dispatch('categories/loadCategories')
-
       isLoading.value = false
     })
 
@@ -159,6 +155,11 @@ export default {
     async function removeProduct() {
       removeConfirm.value = false
       await store.dispatch('products/removeProduct', productData.value.id)
+
+      if (hasChanges.value) {
+        setModelsToInitialValues()
+      }
+
       router.push({ name: 'AdminProducts' })
     }
 
