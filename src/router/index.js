@@ -8,6 +8,7 @@ const router = createRouter({
       name: 'Shop',
       component: () => import('@/views/Shop.vue'),
       meta: {
+        title: 'Магазин',
         layout: 'main'
       }
     },
@@ -16,6 +17,7 @@ const router = createRouter({
       name: 'Product',
       component: () => import('@/views/Product.vue'),
       meta: {
+        title: 'Товар',
         layout: 'main'
       }
     },
@@ -24,6 +26,7 @@ const router = createRouter({
       name: 'Cart',
       component: () => import('@/views/Cart.vue'),
       meta: {
+        title: 'Корзина',
         layout: 'main'
       }
     },
@@ -32,6 +35,7 @@ const router = createRouter({
       name: 'Thanks',
       component: () => import('@/views/Thanks.vue'),
       meta: {
+        title: 'Спасибо за покупку',
         layout: 'main'
       }
     },
@@ -51,17 +55,26 @@ const router = createRouter({
         {
           path: 'products',
           name: 'AdminProducts',
-          component: () => import('@/views/admin/Products.vue')
+          component: () => import('@/views/admin/Products.vue'),
+          meta: {
+            title: 'Инвентарь'
+          }
         },
         {
           path: 'categories',
           name: 'AdminCategories',
-          component: () => import('@/views/admin/Categories.vue')
+          component: () => import('@/views/admin/Categories.vue'),
+          meta: {
+            title: 'Категории'
+          }
         },
         {
           path: 'product/:id',
           name: 'AdminProduct',
-          component: () => import('@/views/admin/Product.vue')
+          component: () => import('@/views/admin/Product.vue'),
+          meta: {
+            title: 'Товар'
+          }
         }
       ]
     },
@@ -70,6 +83,7 @@ const router = createRouter({
       name: 'Auth',
       component: () => import('@/views/Auth.vue'),
       meta: {
+        title: 'Войти в систему',
         layout: 'auth'
       }
     }
@@ -99,6 +113,14 @@ router.beforeEach((to, from, next) => {
   }
 
   next()
+})
+
+router.afterEach(to => {
+  if (to.meta.title) {
+    document.title = `${to.meta.title} | Online Shop`
+  } else {
+    document.title = 'Online Shop'
+  }
 })
 
 export default router

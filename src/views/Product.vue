@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import {ref, onMounted, computed} from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import AppLoader from '@/components/ui/AppLoader'

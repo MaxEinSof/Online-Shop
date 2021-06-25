@@ -2,7 +2,8 @@ export default {
   namespaced: true,
   state() {
     return {
-      message: null
+      message: null,
+      timeoutId: null
     }
   },
   getters: {
@@ -19,9 +20,14 @@ export default {
     }
   },
   actions: {
-    setMessage({ commit }, message) {
-      commit('setMessage', message)
-      setTimeout(() => commit('clearMessage'), 8000)
+    setMessage({ state, commit }, message) {
+      if (state.message) {
+        commit('clearMessage')
+        clearTimeout(state.timeoutId)
+      }
+
+      setTimeout(() => commit('setMessage', message), 0)
+      state.timeoutId = setTimeout(() => commit('clearMessage'), 8000)
     }
   }
 }

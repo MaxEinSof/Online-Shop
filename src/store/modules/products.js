@@ -15,12 +15,13 @@ export default {
         ...state.products.filter(product => product.inStock === 0)
       ]
     },
-    firstMissingProductsIndex(state) {
-      for (let i = state.products.length - 1; i >= 0; i--) {
-        if (state.products[i].inStock !== 0) {
-          return ++i
-        }
-      }
+    firstMissingProductsIndex(state, getters) {
+      const index = getters.products
+        .slice()
+        .reverse()
+        .findIndex(product => product.inStock !== 0)
+
+      return state.products.length - index + 2
     }
   },
   mutations: {

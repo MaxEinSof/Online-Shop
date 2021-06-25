@@ -3,7 +3,7 @@
     <h3>Online Shop</h3>
 
     <ul class="navbar-menu">
-      <li v-if="user">
+      <li v-if="isAuthenticated && user">
         <a
           href="#"
           @click.prevent

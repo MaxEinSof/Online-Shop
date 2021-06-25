@@ -22,7 +22,7 @@
       <slot name="header"></slot>
     </h1>
 
-    <slot></slot>
+    <slot/>
   </div>
 </template>
 
@@ -41,9 +41,6 @@ export default {
       type: Boolean,
       default: false
     }
-  },
-  setup(props) {
-    document.title = `${props.title} | Online Shop`
   }
 }
 </script>

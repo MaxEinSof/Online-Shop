@@ -16,63 +16,13 @@
       height="150"
     />
 
-    <form @submit.prevent="productModel.onSubmit">
-      <app-input
-        id="title"
-        label="Название"
-        v-model="productModel.title"
-        :error="productModel.titleError"
-        :blur="productModel.titleBlur"
-      />
-
-      <app-input
-        id="img"
-        label="Изображение"
-        v-model="productModel.img"
-        :error="productModel.imgError"
-        :blur="productModel.imgBlur"
-      />
-
-      <app-input
-        type="number"
-        id="inStock"
-        label="Количество"
-        v-model.number="productModel.inStock"
-        :error="productModel.inStockError"
-        :blur="productModel.inStockBlur"
-      />
-
-      <app-input
-        type="number"
-        id="price"
-        label="Цена"
-        v-model.number="productModel.price"
-        :error="productModel.priceError"
-        :blur="productModel.priceBlur"
-      />
-
-      <app-select
-        id="category"
-        label="Категория"
-        v-model="productModel.category"
-        :options="selectOptions"
-        :error="productModel.categoryError"
-        :blur="productModel.categoryBlur"
-      />
-
-      <button
-        class="btn danger"
-        type="button"
-        @click="removeConfirm = true"
-      >Удалить</button>
-
-      <button
-        v-if="hasChanges"
-        class="btn"
-        type="submit"
-        :disabled="productModel.isSubmitting || !productModel.title || !productModel.img || productModel.inStock === undefined || !productModel.price || !productModel.category"
-      >Обновить</button>
-    </form>
+    <product-form
+      :product-models="productModels"
+      :product-validation-helpers="productValidationHelpers"
+      :has-changes="hasChanges"
+      @update-product-models="updateProductModels"
+      v-model:remove-confirm="removeConfirm"
+    />
   </app-page>
 
   <p
@@ -103,12 +53,11 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
-import useLeaveGuard from '@/use/leave-guard'
 import useProductValidation from '@/use/product-validation'
+import useLeaveGuard from '@/use/leave-guard'
 import AppLoader from '@/components/ui/AppLoader'
 import AppPage from '@/components/ui/AppPage'
-import AppInput from '@/components/ui/AppInput'
-import AppSelect from '@/components/ui/AppSelect'
+import ProductForm from '@/components/admin/ProductForm'
 import AppConfirm from '@/components/ui/AppConfirm'
 
 export default {
@@ -124,61 +73,66 @@ export default {
     onMounted(async () => {
       initial.value = await store.dispatch('products/loadProductById', route.params.id)
       productValueNames = Object.keys(initial.value)
-      setModelsToInitialValues()
+      updateProductModels(initial.value)
       await store.dispatch('categories/loadCategories')
       isLoading.value = false
     })
 
-    const productModel = reactive(useProductValidation(updateProduct))
-
-    const productData = computed(() => {
-      return productValueNames.reduce((acc, name) => {
-        acc[name] = productModel[name]
-        return acc
-      }, {})
+    const productModels = reactive({
+      id: route.params.id
     })
+
+    const productValidationHelpers = ref({});
+
+    ({
+      title: productModels.title,
+      img: productModels.img,
+      inStock: productModels.inStock,
+      price: productModels.price,
+      category: productModels.category,
+      ...productValidationHelpers.value
+    } = useProductValidation(updateProduct))
 
     const hasChanges = computed(() => {
       return productValueNames.reduce((acc, name) => {
-        return productModel[name] !== initial.value[name] || acc
+        return productModels[name] !== initial.value[name] || acc
       }, false)
     })
 
-    const selectOptions = computed(() => store.getters['categories/selectOptions'])
-
-    function setModelsToInitialValues() {
+    function updateProductModels(values) {
       productValueNames.forEach(name => {
-        productModel[name] = initial.value[name]
+        productModels[name] = values[name]
       })
+    }
+
+    async function updateProduct() {
+      await store.dispatch('products/updateProduct', productModels)
+      initial.value = { ...productModels }
     }
 
     async function removeProduct() {
       removeConfirm.value = false
-      await store.dispatch('products/removeProduct', productData.value.id)
+      await store.dispatch('products/removeProduct', productModels.id)
 
       if (hasChanges.value) {
-        setModelsToInitialValues()
+        updateProductModels(initial.value)
       }
 
       router.push({ name: 'AdminProducts' })
     }
 
-    async function updateProduct() {
-      await store.dispatch('products/updateProduct', productData.value)
-      initial.value = { ...productData.value }
-    }
-
     return {
-      productModel,
+      productModels,
+      productValidationHelpers,
       initial,
       isLoading,
       removeConfirm,
-      selectOptions,
       hasChanges,
+      updateProductModels,
       removeProduct,
       ...useLeaveGuard(hasChanges)
     }
   },
-  components: { AppConfirm, AppLoader, AppPage, AppInput, AppSelect }
+  components: { AppConfirm, AppLoader, AppPage, ProductForm }
 }
 </script>

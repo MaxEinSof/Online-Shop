@@ -1,4 +1,4 @@
-<template>
+ <template>
   <div class="card">
     <shop-filter v-model="filter"/>
 
@@ -26,13 +26,11 @@ export default {
     const products = computed(() => {
       return store.getters['products/products']
         ?.filter(product => {
-          const condition1 = filter.value.name ? product.title.toLowerCase().includes(filter.value.name.toLowerCase()) : true
-          const condition2 = filter.value.type ? product.category === filter.value.type : true
-          return condition1 && condition2
+          const isMatchesNameFilter = filter.value.name ? product.title.toLowerCase().includes(filter.value.name.toLowerCase()) : true
+          const isMatchesTypeFilter = filter.value.type ? product.category === filter.value.type : true
+          return isMatchesNameFilter && isMatchesTypeFilter
         })
     })
-
-    document.title = 'Online Shop'
 
     return {
       filter,

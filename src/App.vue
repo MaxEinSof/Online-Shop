@@ -14,6 +14,7 @@ import AuthLayout from '@/layout/AuthLayout'
 import AdminLayout from '@/layout/AdminLayout'
 import MainLayout from '@/layout/MainLayout'
 import AppMessage from '@/components/ui/AppMessage'
+import useRouteQueryMessage from '@/use/route-query-message'
 
 export default {
   setup() {
@@ -21,7 +22,11 @@ export default {
 
     const layout = computed(() => route.meta.layout)
 
-    return { layout }
+    useRouteQueryMessage()
+
+    return {
+      layout
+    }
   },
   components: { AuthLayout, AdminLayout, MainLayout, AppMessage }
 }
